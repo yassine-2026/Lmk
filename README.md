@@ -1,11 +1,20 @@
-<div align="center">
+# AI Video Script Generator
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A complete AI Video Script Generator website using Groq API (free tier). The site generates professional video scripts for Reels/TikTok/Shorts.
 
-  <h1>Built with AI Studio</h2>
+## Features
+- Single file Flask app (`app.py`)
+- LLaMA 3.3 70B model via Groq
+- Arabic RTL support
+- Mobile-responsive Tailwind CSS frontend
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## Local Setup
+1. `pip install -r requirements.txt`
+2. Create `.env` file with your API key: `GROQ_API_KEY=gsk_your_key_here`
+3. `python app.py`
+4. Open http://localhost:5000
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
-
-</div>
+## Render.com Deployment
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `gunicorn app:app`
+- **Environment Variable**: `GROQ_API_KEY = your_groq_key`
