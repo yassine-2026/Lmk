@@ -169,6 +169,21 @@
                         <div id="scenesContainer" class="space-y-4">
                             <!-- Scenes injected here -->
                         </div>
+                        
+                        <div class="mt-8 text-center border-t border-cardborder pt-6">
+                            <button type="button" onclick="createFullVideo()" id="createBtn" style="display:none" class="bg-gradient-to-l from-accent to-purple-600 hover:from-purple-600 hover:to-accent text-white font-bold py-3 px-8 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all">
+                                🎬 إنشاء الفيديو الكامل
+                            </button>
+                            
+                            <div id="videoResult" style="display:none" class="mt-6 bg-darkbg p-4 rounded-xl border border-cardborder">
+                                <video controls class="w-full max-w-sm mx-auto rounded-lg shadow-lg">
+                                    <source id="videoSource" src="" type="video/mp4">
+                                </video>
+                                <a id="downloadLink" href="" download class="inline-block mt-4 text-primary hover:text-white transition">
+                                    <i class="fa-solid fa-download"></i> 📥 تحميل الفيديو
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -183,6 +198,7 @@
 
     <script>
         let fullScriptText = "";
+        let currentScenes = [];
 
         document.getElementById('videoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -278,6 +294,11 @@
             const container = document.getElementById('scenesContainer');
             container.innerHTML = '';
             fullScriptText = data.voiceover_text || '';
+            currentScenes = data.scenes || [];
+            
+            if (currentScenes.length > 0) {
+                document.getElementById('createBtn').style.display = 'inline-block';
+            }
 
             if (data.scenes && data.scenes.length > 0) {
                 data.scenes.forEach((scene, i) => {
@@ -312,6 +333,40 @@
                 });
             } else {
                 container.innerHTML = `<pre class="whitespace-pre-wrap text-sm text-gray-300 font-mono bg-darkbg p-4 rounded">${data.voiceover_text}</pre>`;
+            }
+        }
+
+        async function createFullVideo() {
+            const btn = document.getElementById('createBtn');
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ⏳ جاري إنشاء الفيديو...';
+            document.getElementById('videoResult').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/create-video', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({scenes: currentScenes})
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    const videoSrc = document.getElementById('videoSource');
+                    videoSrc.src = data.video_url + '?t=' + new Date().getTime();
+                    videoSrc.parentElement.load();
+                    
+                    document.getElementById('downloadLink').href = data.video_url;
+                    document.getElementById('videoResult').style.display = 'block';
+                    showToast('تم إنشاء الفيديو بنجاح!', 'success');
+                } else {
+                    throw new Error(data.error || 'فشل إنشاء الفيديو');
+                }
+            } catch (err) {
+                showToast(err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         }
 

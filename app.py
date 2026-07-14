@@ -6,8 +6,11 @@ from flask_cors import CORS
 from groq import Groq
 import time
 import uuid
+import tempfile
+from moviepy.editor import *
+from gtts import gTTS
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 CORS(app)
 
 # Environment variables
@@ -158,6 +161,101 @@ def generate_video():
             "error": str(e),
             "message": "حدث خطأ. تأكد من المفاتيح والمحاولة مرة أخرى"
         }), 500
+
+@app.route('/api/create-video', methods=['POST'])
+def create_video():
+    try:
+        data = request.get_json()
+        scenes = data.get('scenes', [])
+        
+        clips = []
+        temp_files = []
+        
+        os.makedirs('static', exist_ok=True)
+        
+        for scene in scenes:
+            duration = scene.get('end', 5) - scene.get('start', 0)
+            if duration <= 0:
+                duration = 5
+            
+            # Download stock video
+            if scene.get('videos') and len(scene['videos']) > 0:
+                video_url = scene['videos'][0]['url']
+                video_file = tempfile.NamedTemporaryFile(suffix='.mp4', delete=False)
+                try:
+                    r = requests.get(video_url, timeout=10)
+                    video_file.write(r.content)
+                    video_file.close()
+                    temp_files.append(video_file.name)
+                    
+                    video = VideoFileClip(video_file.name)
+                    video = video.loop(duration=duration).subclip(0, duration)
+                except Exception as e:
+                    print("Error with video download/clip:", e)
+                    video = ColorClip(size=(1080, 1920), color=(0,0,0), duration=duration)
+            else:
+                video = ColorClip(size=(1080, 1920), color=(0,0,0), duration=duration)
+            
+            # Generate voiceover
+            voice_file = tempfile.NamedTemporaryFile(suffix='.mp3', delete=False)
+            try:
+                tts = gTTS(text=scene.get('voice', ' '), lang='ar')
+                tts.save(voice_file.name)
+                voice_file.close()
+                temp_files.append(voice_file.name)
+                
+                audio = AudioFileClip(voice_file.name)
+                video = video.set_audio(audio)
+            except Exception as e:
+                print("Error with TTS:", e)
+                
+            # Resize
+            w, h = video.size
+            if w != 1080 or h != 1920:
+                video = video.resize(height=1920)
+                if video.w > 1080:
+                    video = video.crop(x_center=video.w/2, width=1080)
+                else:
+                    video = video.resize(width=1080, height=1920)
+            
+            # Add text overlay
+            try:
+                txt = TextClip(scene.get('text', ''), fontsize=60, color='white',
+                              stroke_color='black', stroke_width=2, font='Arial')
+                txt = txt.set_position(('center', 'center')).set_duration(duration)
+                final = CompositeVideoClip([video, txt])
+            except Exception as e:
+                print("Error with TextClip:", e)
+                final = video
+                
+            clips.append(final)
+            
+        if not clips:
+            return jsonify({"success": False, "error": "No valid scenes to process"})
+    
+        # Concatenate all clips
+        final_video = concatenate_videoclips(clips, method='compose')
+        
+        # Save video
+        output_filename = f"video_{uuid.uuid4().hex[:8]}.mp4"
+        output_file = f"static/{output_filename}"
+        final_video.write_videofile(output_file, fps=24, codec='libx264', audio_codec='aac', threads=4)
+        
+        # Clean up
+        final_video.close()
+        for clip in clips:
+            clip.close()
+        for f in temp_files:
+            try:
+                os.unlink(f)
+            except Exception:
+                pass
+        
+        return jsonify({"success": True, "video_url": f"/{output_file}"})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/health')
 def health():
