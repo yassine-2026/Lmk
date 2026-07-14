@@ -194,6 +194,11 @@
             const resultsState = document.getElementById('resultsState');
             const emptyState = document.getElementById('emptyState');
             
+            const topic = document.getElementById('topic').value;
+            const duration = document.getElementById('duration').value;
+            const tone = document.getElementById('tone').value;
+            const language = 'arabic'; // as requested
+            
             btn.disabled = true;
             btn.classList.add('opacity-50');
             loading.classList.remove('hidden');
@@ -201,7 +206,6 @@
             resultsState.classList.add('hidden');
             emptyState.classList.add('hidden');
             
-            // Fake progress
             let progress = 0;
             const progressInterval = setInterval(() => {
                 progress += 5;
@@ -214,35 +218,39 @@
             }, 500);
 
             try {
-                const payload = {
-                    topic: document.getElementById('topic').value,
-                    duration: document.getElementById('duration').value,
-                    tone: document.getElementById('tone').value,
-                    music: document.getElementById('music').value,
-                    voice: document.getElementById('voice').value,
-                    language: 'arabic'
-                };
-
-                const res = await fetch('/api/generate-video', {
+                const response = await fetch('/api/generate-video', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        topic: topic,
+                        duration: parseInt(duration),
+                        tone: tone,
+                        language: language
+                    })
                 });
-
+                
                 clearInterval(progressInterval);
                 progressBar.style.width = '100%';
                 
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.error || 'حدث خطأ في الخادم');
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned invalid response. Check your API keys.');
                 }
-
-                const data = await res.json();
-                renderResults(data);
                 
-            } catch (err) {
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderResults(data);
+                } else {
+                    throw new Error(data.message || data.error || 'Generation failed');
+                }
+            } catch (error) {
                 clearInterval(progressInterval);
-                showToast(err.message);
+                showToast(error.message);
                 emptyState.classList.remove('hidden');
             } finally {
                 setTimeout(() => {
@@ -261,18 +269,15 @@
             const vp = document.getElementById('voicePlayer');
             const mp = document.getElementById('musicPlayer');
             
-            if(data.voice_url) {
-                vp.src = data.voice_url;
-            } else if (data.voice_file) {
-                vp.src = '/' + data.voice_file;
-            }
-            if(data.music_url) {
-                mp.src = data.music_url;
+            // Just examples, can be updated later if needed
+            if(data.voice_url) { vp.src = data.voice_url; }
+            if(data.music_suggestion && data.music_suggestion.query) {
+                // This could be mapped to actual audio URLs
             }
 
             const container = document.getElementById('scenesContainer');
             container.innerHTML = '';
-            fullScriptText = data.script;
+            fullScriptText = data.voiceover_text || '';
 
             if (data.scenes && data.scenes.length > 0) {
                 data.scenes.forEach((scene, i) => {
@@ -285,7 +290,6 @@
                                 <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                                     <i class="fa-solid fa-play text-white text-2xl"></i>
                                 </div>
-                                <div class="absolute bottom-1 right-1 bg-black/70 text-xs px-1 rounded">${vid.duration}s</div>
                             </div>
                         `;
                     }
@@ -295,19 +299,19 @@
                             <div class="md:col-span-1">
                                 ${videoHtml}
                                 <div class="text-center mt-2">
-                                    <span class="text-xs bg-primary/20 text-primary px-2 py-1 rounded font-mono">${scene.start_time} - ${scene.end_time}s</span>
+                                    <span class="text-xs bg-primary/20 text-primary px-2 py-1 rounded font-mono">${scene.start} - ${scene.end}s</span>
                                 </div>
                             </div>
                             <div class="md:col-span-3 space-y-2 text-sm">
                                 <p><span class="text-gray-400">الوصف البصري:</span> ${scene.visual}</p>
-                                <p><span class="text-gray-400">النص على الشاشة:</span> <span class="text-accent font-bold">${scene.text_on_screen}</span></p>
-                                <p class="bg-cardbg p-2 rounded border border-cardborder"><span class="text-primary"><i class="fa-solid fa-microphone"></i> التعليق:</span> ${scene.voiceover}</p>
+                                <p><span class="text-gray-400">النص على الشاشة:</span> <span class="text-accent font-bold">${scene.text}</span></p>
+                                <p class="bg-cardbg p-2 rounded border border-cardborder"><span class="text-primary"><i class="fa-solid fa-microphone"></i> التعليق:</span> ${scene.voice}</p>
                             </div>
                         </div>
                     `;
                 });
             } else {
-                container.innerHTML = `<pre class="whitespace-pre-wrap text-sm text-gray-300 font-mono bg-darkbg p-4 rounded">${data.script}</pre>`;
+                container.innerHTML = `<pre class="whitespace-pre-wrap text-sm text-gray-300 font-mono bg-darkbg p-4 rounded">${data.voiceover_text}</pre>`;
             }
         }
 
