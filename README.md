@@ -1,20 +1,20 @@
-# AI Video Script Generator
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-A complete AI Video Script Generator website using Groq API (free tier). The site generates professional video scripts for Reels/TikTok/Shorts.
+# Run and deploy your AI Studio app
 
-## Features
-- Single file Flask app (`app.py`)
-- LLaMA 3.3 70B model via Groq
-- Arabic RTL support
-- Mobile-responsive Tailwind CSS frontend
+This contains everything you need to run your app locally.
 
-## Local Setup
-1. `pip install -r requirements.txt`
-2. Create `.env` file with your API key: `GROQ_API_KEY=gsk_your_key_here`
-3. `python app.py`
-4. Open http://localhost:5000
+View your app in AI Studio: https://ai.studio/apps/d4dcfb3c-403b-492e-aca8-901f80de0b95
 
-## Render.com Deployment
-- **Build Command**: `pip install -r requirements.txt`
-- **Start Command**: `gunicorn app:app`
-- **Environment Variable**: `GROQ_API_KEY = your_groq_key`
+## Run Locally
+
+**Prerequisites:**  Node.js
+
+
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
