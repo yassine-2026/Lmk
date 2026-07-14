@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مولّد سكريبتات الفيديو بالذكاء الاصطناعي</title>
+    <title>AI Video Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -13,37 +13,36 @@
                 extend: {
                     colors: {
                         darkbg: '#0a0a0a',
-                        cardbg: '#18181b',
-                        cardborder: '#27272a',
-                        primary: '#8b5cf6',
-                        accent: '#06b6d4'
+                        cardbg: '#1a1a2e',
+                        cardborder: '#2a2a4a',
+                        primary: '#6366f1',
+                        accent: '#a855f7'
                     },
                     fontFamily: {
-                        sans: ['Tajawal', 'system-ui', 'sans-serif'],
+                        sans: ['system-ui', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
-        body { font-family: 'Tajawal', sans-serif; }
+        body { background: linear-gradient(to bottom right, #0a0a0a, #1a1a2e); color: #fff; min-height: 100vh; }
         .gradient-text {
-            background: linear-gradient(to right, #8b5cf6, #06b6d4);
+            background: linear-gradient(to right, #6366f1, #a855f7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .gradient-btn {
-            background: linear-gradient(to right, #8b5cf6, #06b6d4);
+            background: linear-gradient(to right, #6366f1, #a855f7);
             transition: all 0.3s ease;
         }
         .gradient-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.5);
+            box-shadow: 0 10px 20px -10px rgba(99, 102, 241, 0.5);
         }
         .loading-spinner {
             border: 3px solid rgba(255,255,255,0.1);
-            border-top: 3px solid #06b6d4;
+            border-top: 3px solid #a855f7;
             border-radius: 50%;
             width: 24px;
             height: 24px;
@@ -51,352 +50,281 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #2a2a4a;
+            border-radius: 9999px;
+            overflow: hidden;
+            height: 8px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #6366f1, #a855f7);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
     </style>
 </head>
-<body class="bg-darkbg text-gray-200 min-h-screen">
-    
-    <!-- Navbar -->
-    <nav class="border-b border-cardborder bg-darkbg/80 backdrop-blur-md sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-wand-magic-sparkles text-primary text-xl"></i>
-                    <span class="font-bold text-xl tracking-tight">Script<span class="text-accent">AI</span></span>
-                </div>
-                <div class="flex gap-4">
-                    <a href="#features" class="text-sm text-gray-400 hover:text-white transition">المميزات</a>
-                    <a href="https://render.com" target="_blank" class="text-sm text-gray-400 hover:text-white transition">Render</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <!-- Hero Section -->
-        <div class="text-center mb-16">
-            <h1 class="text-4xl md:text-6xl font-extrabold mb-6">
-                🎬 حول فكرتك إلى <span class="gradient-text">فيديو احترافي</span> في ثواني
-            </h1>
-            <p class="text-lg md:text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                أول موقع عربي يولد سكريبتات فيديو بالذكاء الاصطناعي لمنصات TikTok، Reels، و Shorts بضغطة زر.
-            </p>
-        </div>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">صانع الفيديوهات <span class="gradient-text">بالذكاء الاصطناعي</span></h1>
+            <p class="text-gray-400">أنشئ فيديوهات احترافية مع تعليق صوتي ومقاطع فيديو وموسيقى في ثوانٍ</p>
+        </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <!-- Input Form -->
-            <div class="lg:col-span-4 space-y-6">
-                <div class="bg-cardbg border border-cardborder rounded-2xl p-6 shadow-xl">
-                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-                        <i class="fa-solid fa-pen-nib text-primary"></i> إعدادات الفيديو
-                    </h2>
-                    
-                    <form id="generateForm" class="space-y-5">
-                        <!-- Topic -->
+            <!-- Form -->
+            <div class="lg:col-span-5 bg-cardbg p-6 rounded-2xl border border-cardborder shadow-xl h-fit">
+                <form id="videoForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">موضوع الفيديو</label>
+                        <textarea id="topic" rows="3" class="w-full bg-darkbg border border-cardborder rounded-lg p-3 text-white focus:outline-none focus:border-primary" placeholder="مثال: أهمية الذكاء الاصطناعي في التعليم..." required></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">مدة الفيديو (ثواني)</label>
+                        <input type="range" id="duration" min="15" max="90" step="15" value="30" class="w-full accent-primary" oninput="document.getElementById('durationVal').innerText = this.value + 's'">
+                        <div class="text-center text-sm text-gray-400 mt-1" id="durationVal">30s</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">عن ماذا يتحدث الفيديو؟</label>
-                            <textarea id="topic" rows="3" class="w-full bg-darkbg border border-cardborder rounded-lg p-3 text-white focus:outline-none focus:border-primary transition" placeholder="مثال: 5 نصائح للعمل الحر من المنزل..." required></textarea>
-                        </div>
-                        
-                        <!-- Tone -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">أسلوب الطرح</label>
-                            <select id="tone" class="w-full bg-darkbg border border-cardborder rounded-lg p-3 text-white focus:outline-none focus:border-primary transition">
-                                <option value="حماسي">🔥 حماسي (شيق وسريع)</option>
-                                <option value="هادئ">☕ هادئ (مريح للأعصاب)</option>
-                                <option value="فكاهي">😂 فكاهي (ترفيهي ومضحك)</option>
-                                <option value="تعليمي">📚 تعليمي (مفيد ومركز)</option>
-                                <option value="تحفيزي">🚀 تحفيزي (ملهم وقوي)</option>
-                                <option value="تسويقي">💰 تسويقي (مقنع وجذاب)</option>
+                            <label class="block text-sm font-medium mb-2">أسلوب الطرح</label>
+                            <select id="tone" class="w-full bg-darkbg border border-cardborder rounded-lg p-3 text-white focus:outline-none focus:border-primary">
+                                <option value="احترافي">احترافي</option>
+                                <option value="حماسي">حماسي</option>
+                                <option value="هادئ">هادئ</option>
+                                <option value="فكاهي">فكاهي</option>
+                                <option value="تعليمي">تعليمي</option>
+                                <option value="تسويقي">تسويقي</option>
                             </select>
                         </div>
-
-                        <!-- Duration -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-400 mb-2">مدة الفيديو</label>
-                            <div class="grid grid-cols-4 gap-2">
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="duration" value="15s" class="peer sr-only" checked>
-                                    <div class="text-center py-2 border border-cardborder rounded-lg peer-checked:bg-primary/20 peer-checked:border-primary hover:bg-cardborder transition text-sm">15 ث</div>
-                                </label>
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="duration" value="30s" class="peer sr-only">
-                                    <div class="text-center py-2 border border-cardborder rounded-lg peer-checked:bg-primary/20 peer-checked:border-primary hover:bg-cardborder transition text-sm">30 ث</div>
-                                </label>
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="duration" value="45s" class="peer sr-only">
-                                    <div class="text-center py-2 border border-cardborder rounded-lg peer-checked:bg-primary/20 peer-checked:border-primary hover:bg-cardborder transition text-sm">45 ث</div>
-                                </label>
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="duration" value="60s" class="peer sr-only">
-                                    <div class="text-center py-2 border border-cardborder rounded-lg peer-checked:bg-primary/20 peer-checked:border-primary hover:bg-cardborder transition text-sm">60 ث</div>
-                                </label>
-                            </div>
+                            <label class="block text-sm font-medium mb-2">الموسيقى</label>
+                            <select id="music" class="w-full bg-darkbg border border-cardborder rounded-lg p-3 text-white focus:outline-none focus:border-primary">
+                                <option value="حماسي">حماسي</option>
+                                <option value="هادئ">هادئ</option>
+                                <option value="درامي">درامي</option>
+                                <option value="مرح">مرح</option>
+                                <option value="ملحمي">ملحمي</option>
+                            </select>
                         </div>
-                        
-                        <!-- Language -->
-                        <div>
-                             <label class="block text-sm font-medium text-gray-400 mb-2">لغة السكريبت</label>
-                             <select id="language" class="w-full bg-darkbg border border-cardborder rounded-lg p-3 text-white focus:outline-none focus:border-primary transition">
-                                 <option value="Arabic">العربية (الفصحى)</option>
-                                 <option value="Egyptian Arabic">العربية (اللهجة المصرية)</option>
-                                 <option value="Saudi Arabic">العربية (اللهجة السعودية)</option>
-                                 <option value="English">الإنجليزية</option>
-                             </select>
-                        </div>
-
-                        <button type="submit" id="submitBtn" class="w-full gradient-btn text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
-                            <span>توليد السكريبت</span>
-                            <i class="fa-solid fa-bolt"></i>
-                        </button>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Results Display -->
-            <div class="lg:col-span-8 space-y-6">
-                <!-- Empty State -->
-                <div id="emptyState" class="bg-cardbg border border-cardborder rounded-2xl p-12 shadow-xl flex flex-col items-center justify-center text-center h-full min-h-[500px]">
-                    <div class="w-20 h-20 bg-darkbg rounded-full flex items-center justify-center mb-6 border border-cardborder">
-                        <i class="fa-solid fa-robot text-3xl text-gray-500"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">في انتظار إبداعك!</h3>
-                    <p class="text-gray-400 max-w-sm">أدخل فكرة الفيديو في النموذج الجانبي، وسيقوم الذكاء الاصطناعي بكتابة سكريبت متكامل جاهز للتصوير.</p>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">الصوت (Voiceover)</label>
+                        <select id="voice" class="w-full bg-darkbg border border-cardborder rounded-lg p-3 text-white focus:outline-none focus:border-primary">
+                            <option value="arabic_male">ذكر عربي (Hamed)</option>
+                            <option value="arabic_female">أنثى عربي (Zariyah)</option>
+                            <option value="english_male">English Male (Guy)</option>
+                            <option value="english_female">English Female (Jenny)</option>
+                            <option value="cartoon">كرطوني (Ana)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="generateBtn" class="w-full gradient-btn font-bold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>توليد الفيديو</span>
+                    </button>
+                    
+                    <div id="loadingIndicator" class="hidden flex-col items-center justify-center mt-4">
+                        <p class="text-sm text-gray-400 mb-2" id="loadingText">جاري كتابة السكريبت...</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results -->
+            <div class="lg:col-span-7 space-y-6">
+                <div id="emptyState" class="bg-cardbg border border-cardborder rounded-2xl p-12 text-center h-full flex flex-col justify-center items-center">
+                    <i class="fa-solid fa-film text-6xl text-gray-600 mb-4"></i>
+                    <h3 class="text-xl font-bold mb-2">النتائج ستظهر هنا</h3>
+                    <p class="text-gray-400">املأ النموذج واضغط على توليد لرؤية سحر الذكاء الاصطناعي.</p>
                 </div>
 
-                <!-- Loading State -->
-                <div id="loadingState" class="hidden bg-cardbg border border-cardborder rounded-2xl p-12 shadow-xl flex flex-col items-center justify-center text-center h-full min-h-[500px]">
-                    <div class="loading-spinner mb-6"></div>
-                    <h3 class="text-xl font-bold mb-2 gradient-text">جاري التوليد...</h3>
-                    <p class="text-gray-400">نقوم بصياغة الخطافات، المشاهد، واختيار الموسيقى المناسبة.</p>
-                </div>
-
-                <!-- Results State -->
                 <div id="resultsState" class="hidden space-y-6">
-                    <!-- Actions -->
-                    <div class="flex flex-wrap items-center justify-between gap-4 bg-cardbg border border-cardborder rounded-2xl p-4 shadow-xl">
-                        <h2 class="text-lg font-bold flex items-center gap-2">
-                            <i class="fa-solid fa-clapperboard text-accent"></i> السكريبت النهائي
-                        </h2>
-                        <div class="flex gap-2">
-                            <button onclick="copyFullScript()" class="bg-darkbg hover:bg-cardborder border border-cardborder text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
-                                <i class="fa-regular fa-copy"></i> نسخ
+                    
+                    <div class="bg-cardbg border border-cardborder rounded-2xl p-4 flex gap-4 overflow-x-auto">
+                        <div class="flex-1 bg-darkbg p-3 rounded-xl border border-cardborder text-center">
+                            <i class="fa-solid fa-microphone text-primary mb-2"></i>
+                            <h4 class="text-sm font-bold mb-2">التعليق الصوتي</h4>
+                            <audio id="voicePlayer" controls class="w-full h-8"></audio>
+                        </div>
+                        <div class="flex-1 bg-darkbg p-3 rounded-xl border border-cardborder text-center">
+                            <i class="fa-solid fa-music text-accent mb-2"></i>
+                            <h4 class="text-sm font-bold mb-2">الموسيقى الخلفية</h4>
+                            <audio id="musicPlayer" controls class="w-full h-8"></audio>
+                        </div>
+                    </div>
+
+                    <div class="bg-cardbg border border-cardborder rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg"><i class="fa-solid fa-list text-primary"></i> المشاهد</h3>
+                            <button onclick="copyScript()" class="text-sm bg-darkbg px-3 py-1 rounded hover:bg-gray-800 border border-cardborder transition">
+                                <i class="fa-regular fa-copy"></i> نسخ النص
                             </button>
-                            <button onclick="downloadTxt()" class="bg-darkbg hover:bg-cardborder border border-cardborder text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2">
-                                <i class="fa-solid fa-download"></i> تحميل TXT
-                            </button>
+                        </div>
+                        <div id="scenesContainer" class="space-y-4">
+                            <!-- Scenes injected here -->
                         </div>
                     </div>
 
-                    <!-- Scenes -->
-                    <div id="scenesContainer" class="space-y-4">
-                        <!-- Scenes will be injected here -->
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Hashtags -->
-                        <div class="bg-cardbg border border-cardborder rounded-2xl p-6 shadow-xl">
-                            <h3 class="font-bold mb-3 flex items-center gap-2 text-primary">
-                                <i class="fa-solid fa-hashtag"></i> الهاشتاجات المقترحة
-                            </h3>
-                            <div id="hashtagsContainer" class="flex flex-wrap gap-2 text-sm text-gray-300">
-                                <!-- Hashtags injected here -->
-                            </div>
-                        </div>
-
-                        <!-- Music -->
-                        <div class="bg-cardbg border border-cardborder rounded-2xl p-6 shadow-xl">
-                            <h3 class="font-bold mb-3 flex items-center gap-2 text-accent">
-                                <i class="fa-solid fa-music"></i> الموسيقى المناسبة
-                            </h3>
-                            <p id="musicContainer" class="text-gray-300 text-sm">
-                                <!-- Music injected here -->
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Features Section -->
-        <div id="features" class="mt-24 mb-12">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold">لماذا Script<span class="text-accent">AI</span>؟</h2>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-cardbg p-6 rounded-2xl border border-cardborder text-center hover:border-primary transition">
-                    <i class="fa-solid fa-bolt text-4xl text-primary mb-4"></i>
-                    <h3 class="font-bold text-lg mb-2">سرعة فائقة</h3>
-                    <p class="text-gray-400 text-sm">احصل على سكريبت جاهز في أقل من 5 ثوانٍ بفضل تقنية Groq API.</p>
-                </div>
-                <div class="bg-cardbg p-6 rounded-2xl border border-cardborder text-center hover:border-accent transition">
-                    <i class="fa-solid fa-bullseye text-4xl text-accent mb-4"></i>
-                    <h3 class="font-bold text-lg mb-2">نصوص احترافية</h3>
-                    <p class="text-gray-400 text-sm">مُصمم لخوارزميات منصات الفيديو القصير لضمان أعلى نسبة مشاهدة.</p>
-                </div>
-                <div class="bg-cardbg p-6 rounded-2xl border border-cardborder text-center hover:border-primary transition">
-                    <i class="fa-brands fa-tiktok text-4xl text-primary mb-4"></i>
-                    <h3 class="font-bold text-lg mb-2">جاهز للمنصات</h3>
-                    <p class="text-gray-400 text-sm">مُهيأ خصيصاً لمنصات TikTok و Instagram Reels و YouTube Shorts.</p>
-                </div>
-                <div class="bg-cardbg p-6 rounded-2xl border border-cardborder text-center hover:border-accent transition">
-                    <i class="fa-solid fa-language text-4xl text-accent mb-4"></i>
-                    <h3 class="font-bold text-lg mb-2">دعم عربي أصيل</h3>
-                    <p class="text-gray-400 text-sm">يفهم اللهجات العربية ويصيغ الجمل بأسلوب طبيعي وجذاب للمتلقي.</p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Error Toast -->
+    <!-- Toast -->
     <div id="toast" class="fixed bottom-4 right-4 bg-red-500/10 border border-red-500 text-red-500 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50">
-        <span id="toastMsg">حدث خطأ</span>
+        <span id="toastMsg">خطأ</span>
     </div>
 
     <script>
-        let currentFullScript = "";
+        let fullScriptText = "";
 
-        document.getElementById('generateForm').addEventListener('submit', async (e) => {
+        document.getElementById('videoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const topic = document.getElementById('topic').value;
-            const tone = document.getElementById('tone').value;
-            const duration = document.querySelector('input[name="duration"]:checked').value;
-            const language = document.getElementById('language').value;
+            const btn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loadingIndicator');
+            const progressBar = document.getElementById('progressBar');
+            const loadingText = document.getElementById('loadingText');
+            const resultsState = document.getElementById('resultsState');
+            const emptyState = document.getElementById('emptyState');
             
-            const btn = document.getElementById('submitBtn');
-            const originalBtnContent = btn.innerHTML;
-            
-            // UI States
-            document.getElementById('emptyState').classList.add('hidden');
-            document.getElementById('resultsState').classList.add('hidden');
-            document.getElementById('loadingState').classList.remove('hidden');
-            
-            btn.innerHTML = '<div class="loading-spinner"></div>';
             btn.disabled = true;
+            btn.classList.add('opacity-50');
+            loading.classList.remove('hidden');
+            loading.classList.add('flex');
+            resultsState.classList.add('hidden');
+            emptyState.classList.add('hidden');
+            
+            // Fake progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 5;
+                if (progress <= 90) {
+                    progressBar.style.width = progress + '%';
+                    if (progress === 30) loadingText.innerText = "جاري جلب الفيديوهات من Pexels...";
+                    if (progress === 60) loadingText.innerText = "جاري توليد الصوت بـ Edge-TTS...";
+                    if (progress === 80) loadingText.innerText = "جاري دمج الملفات...";
+                }
+            }, 500);
 
             try {
-                const response = await fetch('/api/generate-script', {
+                const payload = {
+                    topic: document.getElementById('topic').value,
+                    duration: document.getElementById('duration').value,
+                    tone: document.getElementById('tone').value,
+                    music: document.getElementById('music').value,
+                    voice: document.getElementById('voice').value,
+                    language: 'arabic'
+                };
+
+                const res = await fetch('/api/generate-video', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic, tone, duration, language })
+                    body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error || 'فشل الاتصال بالخادم');
-                }
-
-                const data = await response.json();
+                clearInterval(progressInterval);
+                progressBar.style.width = '100%';
                 
-                // Validate JSON structure
-                if (!data.scenes || !Array.isArray(data.scenes)) {
-                    throw new Error('تنسيق البيانات غير صحيح. حاول مجدداً.');
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.error || 'حدث خطأ في الخادم');
                 }
 
+                const data = await res.json();
                 renderResults(data);
                 
-            } catch (error) {
-                showToast(error.message);
-                document.getElementById('loadingState').classList.add('hidden');
-                document.getElementById('emptyState').classList.remove('hidden');
+            } catch (err) {
+                clearInterval(progressInterval);
+                showToast(err.message);
+                emptyState.classList.remove('hidden');
             } finally {
-                btn.innerHTML = originalBtnContent;
-                btn.disabled = false;
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50');
+                    loading.classList.add('hidden');
+                    loading.classList.remove('flex');
+                    progressBar.style.width = '0%';
+                }, 500);
             }
         });
 
         function renderResults(data) {
-            document.getElementById('loadingState').classList.add('hidden');
             document.getElementById('resultsState').classList.remove('hidden');
             
-            currentFullScript = data.script || data.scenes.map(s => `[${s.time}] ${s.visual}\nالصوت: ${s.text}`).join('\n\n');
-
-            const scenesContainer = document.getElementById('scenesContainer');
-            scenesContainer.innerHTML = '';
+            const vp = document.getElementById('voicePlayer');
+            const mp = document.getElementById('musicPlayer');
             
-            data.scenes.forEach((scene, idx) => {
-                const sceneEl = document.createElement('div');
-                sceneEl.className = 'bg-darkbg border border-cardborder rounded-xl p-5 relative overflow-hidden group';
-                sceneEl.innerHTML = `
-                    <div class="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-primary to-accent opacity-50"></div>
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="bg-cardborder text-white text-xs px-3 py-1 rounded-full font-bold">مشهد ${idx + 1}</span>
-                        <span class="text-accent text-xs font-mono bg-accent/10 px-2 py-1 rounded">${scene.time || 'N/A'}</span>
-                    </div>
-                    <div class="space-y-3 mt-4">
-                        <div class="flex gap-3">
-                            <i class="fa-solid fa-video text-gray-500 mt-1"></i>
-                            <p class="text-gray-300 text-sm leading-relaxed">${scene.visual}</p>
-                        </div>
-                        <div class="flex gap-3 bg-cardbg p-3 rounded-lg border border-cardborder/50">
-                            <i class="fa-solid fa-microphone text-primary mt-1"></i>
-                            <p class="text-white font-medium leading-relaxed">${scene.text}</p>
-                        </div>
-                    </div>
-                `;
-                scenesContainer.appendChild(sceneEl);
-            });
-
-            // Hashtags
-            const hashtagsContainer = document.getElementById('hashtagsContainer');
-            hashtagsContainer.innerHTML = '';
-            if (data.hashtags && Array.isArray(data.hashtags)) {
-                data.hashtags.forEach(tag => {
-                    const tagEl = document.createElement('span');
-                    tagEl.className = 'bg-darkbg border border-cardborder px-3 py-1 rounded-full hover:border-primary transition cursor-pointer select-all';
-                    tagEl.textContent = tag.startsWith('#') ? tag : '#' + tag;
-                    hashtagsContainer.appendChild(tagEl);
-                });
+            if(data.voice_url) {
+                vp.src = data.voice_url;
+            } else if (data.voice_file) {
+                vp.src = '/' + data.voice_file;
+            }
+            if(data.music_url) {
+                mp.src = data.music_url;
             }
 
-            // Music
-            document.getElementById('musicContainer').textContent = data.music_suggestion || 'اختر موسيقى رائجة (Trending) تناسب جو الفيديو';
-        }
+            const container = document.getElementById('scenesContainer');
+            container.innerHTML = '';
+            fullScriptText = data.script;
 
-        function copyFullScript() {
-            if(currentFullScript) {
-                navigator.clipboard.writeText(currentFullScript).then(() => {
-                    showToast('تم نسخ السكريبت بنجاح!', 'success');
-                }).catch(() => {
-                    showToast('فشل النسخ!');
+            if (data.scenes && data.scenes.length > 0) {
+                data.scenes.forEach((scene, i) => {
+                    let videoHtml = '<div class="w-full h-32 bg-gray-800 rounded flex items-center justify-center text-gray-500 text-xs">لا يوجد فيديو مقترح</div>';
+                    if (scene.videos && scene.videos.length > 0) {
+                        const vid = scene.videos[0];
+                        videoHtml = `
+                            <div class="relative w-full h-32 rounded overflow-hidden group cursor-pointer" onclick="window.open('${vid.url}', '_blank')">
+                                <img src="${vid.image || ''}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/300x200?text=Video+Thumbnail'" />
+                                <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                    <i class="fa-solid fa-play text-white text-2xl"></i>
+                                </div>
+                                <div class="absolute bottom-1 right-1 bg-black/70 text-xs px-1 rounded">${vid.duration}s</div>
+                            </div>
+                        `;
+                    }
+
+                    container.innerHTML += `
+                        <div class="bg-darkbg border border-cardborder rounded-xl p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                            <div class="md:col-span-1">
+                                ${videoHtml}
+                                <div class="text-center mt-2">
+                                    <span class="text-xs bg-primary/20 text-primary px-2 py-1 rounded font-mono">${scene.start_time} - ${scene.end_time}s</span>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3 space-y-2 text-sm">
+                                <p><span class="text-gray-400">الوصف البصري:</span> ${scene.visual}</p>
+                                <p><span class="text-gray-400">النص على الشاشة:</span> <span class="text-accent font-bold">${scene.text_on_screen}</span></p>
+                                <p class="bg-cardbg p-2 rounded border border-cardborder"><span class="text-primary"><i class="fa-solid fa-microphone"></i> التعليق:</span> ${scene.voiceover}</p>
+                            </div>
+                        </div>
+                    `;
                 });
-            }
-        }
-
-        function downloadTxt() {
-            if(currentFullScript) {
-                const blob = new Blob([currentFullScript], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `script_${Date.now()}.txt`;
-                a.click();
-                URL.revokeObjectURL(url);
+            } else {
+                container.innerHTML = `<pre class="whitespace-pre-wrap text-sm text-gray-300 font-mono bg-darkbg p-4 rounded">${data.script}</pre>`;
             }
         }
 
         function showToast(msg, type = 'error') {
             const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMsg');
-            
-            if(type === 'success') {
-                toast.className = "fixed bottom-4 right-4 bg-green-500/10 border border-green-500 text-green-500 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 z-50 transform translate-y-0 opacity-100";
-            } else {
-                toast.className = "fixed bottom-4 right-4 bg-red-500/10 border border-red-500 text-red-500 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 z-50 transform translate-y-0 opacity-100";
-            }
-            
-            toastMsg.textContent = msg;
-            
+            toast.className = `fixed bottom-4 right-4 ${type === 'error' ? 'bg-red-500/10 border-red-500 text-red-500' : 'bg-green-500/10 border-green-500 text-green-500'} border px-6 py-3 rounded-lg shadow-lg transition-all duration-300 z-50 transform translate-y-0 opacity-100`;
+            document.getElementById('toastMsg').innerText = msg;
             setTimeout(() => {
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-20', 'opacity-0');
             }, 3000);
+        }
+
+        function copyScript() {
+            if(fullScriptText) {
+                navigator.clipboard.writeText(fullScriptText).then(() => showToast('تم نسخ النص', 'success'));
+            }
         }
     </script>
 </body>
