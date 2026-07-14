@@ -171,16 +171,17 @@
                         </div>
                         
                         <div class="mt-8 text-center border-t border-cardborder pt-6">
-                            <button type="button" onclick="createFullVideo()" id="createBtn" style="display:none" class="bg-gradient-to-l from-accent to-purple-600 hover:from-purple-600 hover:to-accent text-white font-bold py-3 px-8 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all">
+                            <button type="button" onclick="createFullVideo()" id="createVideoBtn" style="display:none" class="bg-gradient-to-l from-accent to-purple-600 hover:from-purple-600 hover:to-accent text-white font-bold py-3 px-8 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all">
                                 🎬 إنشاء الفيديو الكامل
                             </button>
                             
-                            <div id="videoResult" style="display:none" class="mt-6 bg-darkbg p-4 rounded-xl border border-cardborder">
-                                <video controls class="w-full max-w-sm mx-auto rounded-lg shadow-lg">
+                            <div id="videoSection" style="display:none; margin-top:20px;" class="mt-6 bg-darkbg p-4 rounded-xl border border-cardborder">
+                                <h3 style="color:#fff; margin-bottom:10px;">🎬 الفيديو النهائي</h3>
+                                <video id="finalVideo" controls width="100%" class="max-w-sm mx-auto" style="border-radius:10px;">
                                     <source id="videoSource" src="" type="video/mp4">
                                 </video>
-                                <a id="downloadLink" href="" download class="inline-block mt-4 text-primary hover:text-white transition">
-                                    <i class="fa-solid fa-download"></i> 📥 تحميل الفيديو
+                                <a id="downloadVideo" href="#" download style="display:inline-block; margin-top:10px; padding:12px 24px; background:#8b5cf6; color:#fff; border-radius:8px; text-decoration:none;">
+                                    📥 تحميل الفيديو
                                 </a>
                             </div>
                         </div>
@@ -297,7 +298,7 @@
             currentScenes = data.scenes || [];
             
             if (currentScenes.length > 0) {
-                document.getElementById('createBtn').style.display = 'inline-block';
+                document.getElementById('createVideoBtn').style.display = 'inline-block';
             }
 
             if (data.scenes && data.scenes.length > 0) {
@@ -337,11 +338,11 @@
         }
 
         async function createFullVideo() {
-            const btn = document.getElementById('createBtn');
+            const btn = document.getElementById('createVideoBtn');
             btn.disabled = true;
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ⏳ جاري إنشاء الفيديو...';
-            document.getElementById('videoResult').style.display = 'none';
+            document.getElementById('videoSection').style.display = 'none';
             
             try {
                 const response = await fetch('/api/create-video', {
@@ -354,10 +355,10 @@
                 if (data.success) {
                     const videoSrc = document.getElementById('videoSource');
                     videoSrc.src = data.video_url + '?t=' + new Date().getTime();
-                    videoSrc.parentElement.load();
+                    document.getElementById('finalVideo').load();
                     
-                    document.getElementById('downloadLink').href = data.video_url;
-                    document.getElementById('videoResult').style.display = 'block';
+                    document.getElementById('downloadVideo').href = data.download_url;
+                    document.getElementById('videoSection').style.display = 'block';
                     showToast('تم إنشاء الفيديو بنجاح!', 'success');
                 } else {
                     throw new Error(data.error || 'فشل إنشاء الفيديو');
